@@ -1,0 +1,4 @@
+#Fri Jul 12 12:35:36 CLT 2024
+base.0=C\:\\Users\\laboratorio\\Desktop\\prueba2\\proyecto_prueba\\build\\app\\intermediates\\dex\\debug\\mergeDexDebug\\classes.dex
+path.0=classes.dex
+renamed.0=classes.dex
