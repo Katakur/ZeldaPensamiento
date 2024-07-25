@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class MonsterPage extends StatelessWidget {
-  const MonsterPage({super.key});
+class TreasurePage extends StatelessWidget {
+  const TreasurePage({super.key});
 
   @override
   Widget build(BuildContext context) {
