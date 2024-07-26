@@ -1,10 +1,8 @@
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:zelda_pensamiento/model/treasure.dart';
+import 'package:zelda_pensamiento/treasure_display.dart';
 
 class TresurePage extends StatefulWidget {
   @override
@@ -34,11 +32,9 @@ class _TresurePageState extends State<TresurePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
-        title: Text('Monster Page'),
+        title: Text('Treasure Page'),
       ),
-
       body: Center(
         child: FutureBuilder<List<Treasure>>(
           future: futureTreasure,
@@ -58,6 +54,14 @@ class _TresurePageState extends State<TresurePage> {
                     leading: Image.network(treasure.image, width: 50, height: 50, fit: BoxFit.cover),
                     title: Text(treasure.name),
                     subtitle: Text("${treasure.category}"),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TreasureDisplay(id: treasure.id), 
+                        ),
+                      );
+                    },
                   );
                 },
               );

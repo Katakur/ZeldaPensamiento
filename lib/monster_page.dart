@@ -1,10 +1,8 @@
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:zelda_pensamiento/model/monster.dart';
+import 'package:zelda_pensamiento/monster_display.dart';
 
 class MonsterPage extends StatefulWidget {
   @override
@@ -27,18 +25,16 @@ class _MonsterPageState extends State<MonsterPage> {
       final List<dynamic> jsonDecoded = jsonDecode(response.body)["data"] as List<dynamic>;
       return jsonDecoded.map((dynamic item) => Monster.fromJson(item as Map<String, dynamic>)).toList();
     } else {
-      throw Exception('Failed to load Mounstruos');
+      throw Exception('Failed to load monsters');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
         title: Text('Monster Page'),
       ),
-
       body: Center(
         child: FutureBuilder<List<Monster>>(
           future: futureMonster,
@@ -58,6 +54,14 @@ class _MonsterPageState extends State<MonsterPage> {
                     leading: Image.network(monster.image, width: 50, height: 50, fit: BoxFit.cover),
                     title: Text(monster.name),
                     subtitle: Text("${monster.category}"),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MonsterDisplay(id: monster.id), 
+                        ),
+                      );
+                    },
                   );
                 },
               );

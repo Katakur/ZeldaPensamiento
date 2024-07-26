@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:zelda_pensamiento/model/equipment.dart';
-import 'package:zelda_pensamiento/equipment_display.dart'; // Asegúrate de importar la clase EquipmentDisplay
+import 'package:zelda_pensamiento/equipment_display.dart'; 
 
 class EquipmentPage extends StatefulWidget {
   @override
@@ -58,7 +58,7 @@ class _EquipmentPageState extends State<EquipmentPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => EquipmentDisplay(id: equipment.id), // Enviar el id del equipo
+                          builder: (context) => EquipmentDisplay(id: equipment.id), 
                         ),
                       );
                     },
