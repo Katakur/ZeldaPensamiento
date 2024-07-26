@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:zelda_pensamiento/model/equipment.dart';
 import 'package:zelda_pensamiento/equipment_display.dart';
 
@@ -18,79 +20,117 @@ class _EquipmentPageState extends State<EquipmentPage> {
     futureEquipment = fetchEquipment();
   }
 
-  Future<List<Equipment>> fetchEquipment() async {
-    final response = await http.get(Uri.parse('https://botw-compendium.herokuapp.com/api/v3/compendium/category/equipment'));
+  Future<File> _getLocalFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    return File('${directory.path}/equipmentlist.json');
+  }
 
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonDecoded = jsonDecode(response.body)["data"] as List<dynamic>;
-      return jsonDecoded.map((dynamic item) => Equipment.fromJson(item as Map<String, dynamic>)).toList();
-    } else {
-      throw Exception('Failed to load equipment');
+  Future<List<Equipment>> fetchEquipment() async {
+    final file = await _getLocalFile();
+    if (!file.existsSync()) {
+      throw Exception('Local file does not exist');
     }
+
+    final jsonString = await file.readAsString();
+    final List<dynamic> jsonDecoded = jsonDecode(jsonString)["data"];
+    return jsonDecoded.map((dynamic item) => Equipment.fromJson(item as Map<String, dynamic>)).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Equipment Page',
-        style: TextStyle(
-            fontFamily: 'zelda', // Usa la fuente personalizada
-            fontSize: 20, // Ajusta el tamaño de la fuente según lo necesites
-          ),),
-        backgroundColor: Color.fromARGB(255, 205, 247, 253), // Cambia el color del AppBar
+        title: Text(
+          'Equipment Page',
+          style: TextStyle(
+            fontFamily: 'zelda', 
+            fontSize: 20, 
+          ),
+        ),
+        backgroundColor: Color.fromARGB(255, 205, 247, 253), 
       ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color.fromARGB(255, 146, 197, 130), // Color ARGB
-              Color.fromARGB(255, 80, 121, 76)    // Color ARGB
-            ], // Degradado para el fondo
+              Color.fromARGB(255, 146, 197, 130), 
+              Color.fromARGB(255, 80, 121, 76)    
+            ], 
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
         ),
-        child: Center(
-          child: FutureBuilder<List<Equipment>>(
-            future: futureEquipment,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text("Error: ${snapshot.error}");
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return Text("No data available");
-              } else {
-                return ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) {
-                    final equipment = snapshot.data![index];
-                    return Card(
-                      color: Color.fromARGB(255, 253, 255, 224), // Color del fondo del Card
-                      child: ListTile(
-                        leading: Image.network(equipment.image, width: 50, height: 50, fit: BoxFit.cover),
-                        title: Text(equipment.name, style: TextStyle(color: Color.fromARGB(255, 118, 118, 118), fontFamily: 'zelda')), // Color del texto
-                        subtitle: Text(
-                          "${equipment.category}",
-                          style: TextStyle(color: Color.fromARGB(255, 118, 118, 118), fontFamily: 'zelda'), // Color del subtítulo
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EquipmentDisplay(id: equipment.id),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                );
-              }
-            },
-          ),
+        child: FutureBuilder<List<Equipment>>(
+          future: futureEquipment,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text("Error: ${snapshot.error}"));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return Center(child: Text("No data available"));
+            } else {
+              final equipmentList = snapshot.data!;
+              final favorites = equipmentList.where((item) => item.favorite).toList();
+              final others = equipmentList.where((item) => !item.favorite).toList();
+
+              return ListView(
+                children: [
+                  if (favorites.isNotEmpty) ...[
+                    _buildSectionTitle('Favorites'),
+                    ...favorites.map((item) => _buildListTile(item)),
+                  ] else ...[
+                    _buildSectionTitle('Favorites'),
+                    ListTile(title: Text("No favorite items")),
+                  ],
+                  if (others.isNotEmpty) ...[
+                    _buildSectionTitle('Others'),
+                    ...others.map((item) => _buildListTile(item)),
+                  ] else ...[
+                    _buildSectionTitle('Others'),
+                    ListTile(title: Text("No other items")),
+                  ],
+                ],
+              );
+            }
+          },
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      color: Color.fromARGB(255, 80, 121, 76),
+      child: Text(
+        title,
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildListTile(Equipment equipment) {
+    return Card(
+      color: Color.fromARGB(255, 253, 255, 224), 
+      child: ListTile(
+        leading: Image.network(equipment.image, width: 50, height: 50, fit: BoxFit.cover),
+        title: Text(
+          equipment.name,
+          style: TextStyle(color: Color.fromARGB(255, 118, 118, 118), fontFamily: 'zelda'),
+        ),
+        subtitle: Text(
+          "${equipment.category}",
+          style: TextStyle(color: Color.fromARGB(255, 118, 118, 118), fontFamily: 'zelda'),
+        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EquipmentDisplay(id: equipment.id),
+            ),
+          );
+        },
       ),
     );
   }
