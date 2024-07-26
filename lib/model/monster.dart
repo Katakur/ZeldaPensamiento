@@ -6,7 +6,7 @@ class Monster {
   String name;
   List<String> commonLocations;
   bool dlc;
-  List<String>? drops; // Nullable because drops can be null in the JSON
+  List<String>? drops; 
   bool favorite;
 
   Monster({
@@ -30,12 +30,12 @@ class Monster {
       name: json['name'] as String,
       commonLocations: json['common_locations'] != null 
           ? List<String>.from(json['common_locations'] as List<dynamic>)
-          : [], // Provide an empty list if null
-      dlc: json['dlc'] ?? false, // Provide a default value if null
+          : [], 
+      dlc: json['dlc'] ?? false, 
       drops: json['drops'] != null 
           ? List<String>.from(json['drops'] as List<dynamic>) 
           : null,
-      favorite: json['favorite'] ?? false, // Provide a default value if null
+      favorite: json['favorite'] ?? false, 
     );
   }
 }
