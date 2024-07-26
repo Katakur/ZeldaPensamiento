@@ -36,7 +36,7 @@ class _TresurePageState extends State<TreasurePage> {
     return Scaffold(
 
       appBar: AppBar(
-        title: Text('Monster Page'),
+        title: Text('Treasure Page'),
       ),
 
       body: Center(

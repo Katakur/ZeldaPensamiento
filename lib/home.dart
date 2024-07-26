@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> {
               ),
 
               ListTile(
-                title: const Text('Tesoros'),
+                title: const Text('Treasure'),
                 onTap: () {
                   Navigator.push(
                     context,
@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> {
               ),
 
               ListTile(
-                title: const Text('Mounstruos'),
+                title: const Text('Monsters'),
                 onTap: () {
                   Navigator.push(
                     context,
@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage> {
               ),
 
               ListTile(
-                title: const Text('Equipo'),
+                title: const Text('Equipment'),
                 onTap: () {
                   Navigator.push(
                     context,
