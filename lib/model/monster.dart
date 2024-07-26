@@ -38,5 +38,9 @@ class Monster {
       favorite: json['favorite'] ?? false, // Provide a default value if null
     );
   }
+
+  void cambiarSeleccionado() {
+    favorite = !favorite;
+  }
 }
 
