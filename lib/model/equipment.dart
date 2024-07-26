@@ -4,9 +4,10 @@ class Equipment {
   int id;
   String image;
   String name;
-  //List<String> commonLocations;
+  List<String> commonLocations; // Uncomment and use if you need this field
   bool dlc;
-  //EquipmentProperties properties;
+  EquipmentProperties? properties; // Make this nullable if it's not always present
+  bool favorite;
 
   Equipment({
     required this.category,
@@ -14,9 +15,10 @@ class Equipment {
     required this.id,
     required this.image,
     required this.name,
-    //required this.commonLocations,
+    required this.commonLocations, // Uncomment if you are using this field
     required this.dlc,
-    //required this.properties,
+    this.properties, // Make it optional
+    required this.favorite,
   });
 
   factory Equipment.fromJson(Map<String, dynamic> json) {
@@ -26,9 +28,14 @@ class Equipment {
       id: json['id'] as int,
       image: json['image'] as String,
       name: json['name'] as String,
-      //commonLocations: List<String>.from(json['common_locations'] as List<dynamic>),
-      dlc: json['dlc'] as bool,
-      //properties: EquipmentProperties.fromJson(json['properties'] as Map<String, dynamic>),
+      commonLocations: json['common_locations'] != null 
+          ? List<String>.from(json['common_locations'] as List<dynamic>) 
+          : [], // Provide an empty list if null
+      dlc: json['dlc'] ?? false, // Provide a default value if null
+      properties: json['properties'] != null 
+          ? EquipmentProperties.fromJson(json['properties'] as Map<String, dynamic>) 
+          : null, // Make properties optional
+      favorite: json['favorite'] ?? false, // Provide a default value if null
     );
   }
 }
@@ -44,8 +51,8 @@ class EquipmentProperties {
 
   factory EquipmentProperties.fromJson(Map<String, dynamic> json) {
     return EquipmentProperties(
-      attack: json['attack'] as int,
-      defense: json['defense'] as int,
+      attack: json['attack'] ?? 0, // Provide a default value if null
+      defense: json['defense'] ?? 0, // Provide a default value if null
     );
   }
 }

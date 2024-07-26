@@ -7,6 +7,7 @@ class Treasure {
   List<String> commonLocations;
   List<String> drops;
   bool dlc;
+  bool favorite;
 
   Treasure({
     required this.category,
@@ -17,6 +18,7 @@ class Treasure {
     required this.commonLocations,
     required this.drops,
     required this.dlc,
+    required this.favorite,
   });
 
   factory Treasure.fromJson(Map<String, dynamic> json) {
@@ -26,9 +28,14 @@ class Treasure {
       id: json['id'] as int,
       image: json['image'] as String,
       name: json['name'] as String,
-      commonLocations: List<String>.from(json['common_locations'] as List<dynamic>),
-      drops: List<String>.from(json['drops'] as List<dynamic>),
-      dlc: json['dlc'] as bool,
+      commonLocations: json['common_locations'] != null 
+          ? List<String>.from(json['common_locations'] as List<dynamic>) 
+          : [], // Provide an empty list if null
+      drops: json['drops'] != null 
+          ? List<String>.from(json['drops'] as List<dynamic>) 
+          : [], // Provide an empty list if null
+      dlc: json['dlc'] ?? false, // Provide a default value if null
+      favorite: json['favorite'] ?? false, // Provide a default value if null
     );
   }
 }

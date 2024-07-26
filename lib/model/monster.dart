@@ -7,6 +7,7 @@ class Monster {
   List<String> commonLocations;
   bool dlc;
   List<String>? drops; // Nullable because drops can be null in the JSON
+  bool favorite;
 
   Monster({
     required this.category,
@@ -17,6 +18,7 @@ class Monster {
     required this.commonLocations,
     required this.dlc,
     this.drops,
+    required this.favorite,
   });
 
   factory Monster.fromJson(Map<String, dynamic> json) {
@@ -33,6 +35,7 @@ class Monster {
       drops: json['drops'] != null 
           ? List<String>.from(json['drops'] as List<dynamic>) 
           : null,
+      favorite: json['favorite'] ?? false, // Provide a default value if null
     );
   }
 }

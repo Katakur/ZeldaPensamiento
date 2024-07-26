@@ -1,11 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'model/monster.dart';
+
+import 'package:zelda_pensamiento/model/monster.dart';
 
 class MonsterPage extends StatefulWidget {
-  const MonsterPage({super.key});
-
   @override
   _MonsterPageState createState() => _MonsterPageState();
 }
@@ -26,27 +27,28 @@ class _MonsterPageState extends State<MonsterPage> {
       final List<dynamic> jsonDecoded = jsonDecode(response.body)["data"] as List<dynamic>;
       return jsonDecoded.map((dynamic item) => Monster.fromJson(item as Map<String, dynamic>)).toList();
     } else {
-      throw Exception('Failed to load Monster');
+      throw Exception('Failed to load Mounstruos');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Monster Page'),
+        title: Text('Monster Page'),
       ),
+
       body: Center(
         child: FutureBuilder<List<Monster>>(
           future: futureMonster,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
+              return CircularProgressIndicator();
             } else if (snapshot.hasError) {
               return Text("Error: ${snapshot.error}");
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Text("No data available");
+              return Text("No data available");
             } else {
               return ListView.builder(
                 itemCount: snapshot.data!.length,
@@ -55,7 +57,7 @@ class _MonsterPageState extends State<MonsterPage> {
                   return ListTile(
                     leading: Image.network(monster.image, width: 50, height: 50, fit: BoxFit.cover),
                     title: Text(monster.name),
-                    subtitle: Text(monster.category),
+                    subtitle: Text("${monster.category}"),
                   );
                 },
               );

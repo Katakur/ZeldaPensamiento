@@ -1,11 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'model/equipment.dart';
+
+import 'package:zelda_pensamiento/model/equipment.dart';
 
 class EquipmentPage extends StatefulWidget {
-  const EquipmentPage({super.key});
-
   @override
   _EquipmentPageState createState() => _EquipmentPageState();
 }
@@ -26,27 +27,28 @@ class _EquipmentPageState extends State<EquipmentPage> {
       final List<dynamic> jsonDecoded = jsonDecode(response.body)["data"] as List<dynamic>;
       return jsonDecoded.map((dynamic item) => Equipment.fromJson(item as Map<String, dynamic>)).toList();
     } else {
-      throw Exception('Failed to load Equipment');
+      throw Exception('Failed to load Equipo');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Equipment Page'),
+        title: Text('Equipment Page'),
       ),
+
       body: Center(
         child: FutureBuilder<List<Equipment>>(
           future: futureEquipment,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
+              return CircularProgressIndicator();
             } else if (snapshot.hasError) {
               return Text("Error: ${snapshot.error}");
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Text("No data available");
+              return Text("No data available");
             } else {
               return ListView.builder(
                 itemCount: snapshot.data!.length,
@@ -55,7 +57,7 @@ class _EquipmentPageState extends State<EquipmentPage> {
                   return ListTile(
                     leading: Image.network(equipment.image, width: 50, height: 50, fit: BoxFit.cover),
                     title: Text(equipment.name),
-                    subtitle: Text(equipment.category),
+                    subtitle: Text("${equipment.category}"),
                   );
                 },
               );
