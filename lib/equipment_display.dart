@@ -79,7 +79,10 @@ class _EquipmentDisplayState extends State<EquipmentDisplay> {
       }
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Favorite: ${_equipment?.favorite == true ? 'Yes' : 'No'}')),
+      SnackBar(
+        content: Text('Favorite: ${_equipment?.favorite == true ? 'Yes' : 'No'}'),
+        backgroundColor: Colors.green,
+      ),
     );
   }
 
@@ -87,74 +90,133 @@ class _EquipmentDisplayState extends State<EquipmentDisplay> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Equipment Details'),
+        title: Text(
+          'Equipment Details',
+          style: TextStyle(
+            fontFamily: 'zelda',
+            fontSize: 20,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Color.fromARGB(255, 146, 197, 130),
       ),
-
-      body: FutureBuilder<Equipment?>(
-        future: futureEquipment,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
-          } else if (!snapshot.hasData || snapshot.data == null) {
-            return Center(child: Text("No data available"));
-          } else {
-            _equipment = snapshot.data!;
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  
-                  Image.network(
-                    _equipment!.image,
-                    fit: BoxFit.cover,
-                    height: 200,
-                    width: double.infinity,
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    _equipment!.name,
-                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    _equipment!.description,
-                    style: TextStyle(fontSize: 25),
-                  ),
-                  SizedBox(height: 8),
-                  if (_equipment!.commonLocations.isNotEmpty)
+      body: Container(
+        decoration: BoxDecoration(
+          color: Color.fromARGB(255, 58, 56, 56), // Fondo oscuro
+        ),
+        child: FutureBuilder<Equipment?>(
+          future: futureEquipment,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text("Error: ${snapshot.error}", style: TextStyle(color: Colors.white)));
+            } else if (!snapshot.hasData || snapshot.data == null) {
+              return Center(child: Text("No data available", style: TextStyle(color: Colors.white)));
+            } else {
+              _equipment = snapshot.data!;
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 8,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          _equipment!.image,
+                          fit: BoxFit.cover,
+                          height: 200,
+                          width: double.infinity,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
                     Text(
-                      'Common Locations:',
-                      style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                      _equipment!.name,
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'zelda',
+                        color: Color.fromARGB(255, 253, 255, 224),
+                      ),
                     ),
-                  ..._equipment!.commonLocations.map(
-                    (location) => Text(
-                      location,
-                      style: TextStyle(fontSize: 20),
+                    SizedBox(height: 8),
+                    Text(
+                      _equipment!.description,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontFamily: 'zelda',
+                        color: Colors.white70,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'DLC: ${_equipment!.dlc ? 'Yes' : 'No'}',
-                    style: TextStyle(fontSize: 25),
-                  ),
-                  SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: _cambiarSeleccionado,
-                    child: Text('Toggle Favorite'),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Favorite: ${_equipment!.favorite ? 'Yes' : 'No'}',
-                    style: TextStyle(fontSize: 25),
-                  ),
-                ],
-              ),
-            );
-          }
-        },
+                    SizedBox(height: 8),
+                    if (_equipment!.commonLocations.isNotEmpty)
+                      Text(
+                        'Common Locations:',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'zelda',
+                          color: Color.fromARGB(255, 253, 255, 224),
+                        ),
+                      ),
+                    ..._equipment!.commonLocations.map(
+                      (location) => Text(
+                        location,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontFamily: 'zelda',
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'DLC: ${_equipment!.dlc ? 'Yes' : 'No'}',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontFamily: 'zelda',
+                        color: Color.fromARGB(255, 253, 255, 224),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            _equipment!.favorite ? Icons.star : Icons.star_border,
+                            color: Color.fromARGB(255, 146, 197, 130),
+                          ),
+                          onPressed: _cambiarSeleccionado,
+                        ),
+                        /*Text(
+                          'Favorite: ${_equipment!.favorite ? 'Yes' : 'No'}',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontFamily: 'zelda',
+                            color: Color.fromARGB(255, 253, 255, 224),
+                          ),
+                        ),*/
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }
+          },
+        ),
       ),
     );
   }

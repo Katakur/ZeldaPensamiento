@@ -11,6 +11,7 @@ import 'package:zelda_pensamiento/equipment_display.dart';
 import 'package:zelda_pensamiento/equipment_page.dart';
 import 'package:zelda_pensamiento/monster_page.dart';
 import 'package:zelda_pensamiento/treasure_page.dart';
+import 'package:zelda_pensamiento/about_page.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -115,6 +116,16 @@ class _HomePageState extends State<HomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => EquipmentPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.add_home, color: Color.fromARGB(255, 118, 118, 118)),
+              title: const Text('About', style: TextStyle(fontFamily: 'zelda')),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AboutPage()),
                 );
               },
             ),
