@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io'; 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart'; 
+import 'package:http/http.dart' as http; 
 import 'package:zelda_pensamiento/model/treasure.dart';
 import 'package:zelda_pensamiento/treasure_display.dart';
 
@@ -15,92 +17,131 @@ class _TreasurePageState extends State<TreasurePage> {
   @override
   void initState() {
     super.initState();
-    futureTreasure = fetchTreasure();
+    futureTreasure = fetchTreasures();
   }
 
-  Future<List<Treasure>> fetchTreasure() async {
-    final response = await http.get(Uri.parse('https://botw-compendium.herokuapp.com/api/v3/compendium/category/treasure'));
+  Future<File> _getLocalFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    return File('${directory.path}/treasurelist.json');
+  }
 
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonDecoded = jsonDecode(response.body)["data"] as List<dynamic>;
-      return jsonDecoded.map((dynamic item) => Treasure.fromJson(item as Map<String, dynamic>)).toList();
-    } else {
-      throw Exception('Failed to load Treasure');
+  Future<void> _copyAssetToLocal() async {
+    final file = await _getLocalFile();
+    if (!file.existsSync()) {
+      final response = await http.get(Uri.parse('https://botw-compendium.herokuapp.com/api/v3/compendium/category/treasure'));
+      if (response.statusCode == 200) {
+        await file.writeAsString(response.body);
+      } else {
+        throw Exception('Failed to load treasures');
+      }
     }
+  }
+
+  Future<List<Treasure>> fetchTreasures() async {
+    await _copyAssetToLocal();
+    final file = await _getLocalFile();
+    final String jsonString = await file.readAsString();
+    final List<dynamic> jsonDecoded = jsonDecode(jsonString)["data"] as List<dynamic>;
+
+    final List<Treasure> treasures = jsonDecoded.map((dynamic item) => Treasure.fromJson(item as Map<String, dynamic>)).toList();
+    return treasures;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Treasure Page', 
+        title: Text('Treasure Page',
           style: TextStyle(
-            fontFamily: 'zelda', // Usa la fuente personalizada
-            fontSize: 20, // Ajusta el tamaño de la fuente según lo necesites
-          )
+            fontFamily: 'zelda', 
+            fontSize: 20, 
+          ),
         ),
-        backgroundColor: Color.fromARGB(255, 205, 247, 253), // Cambia el color del AppBar
+        backgroundColor: Color.fromARGB(255, 205, 247, 253), 
       ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color.fromARGB(255, 146, 197, 130), // Color ARGB
-              Color.fromARGB(255, 80, 121, 76)    // Color ARGB
-            ], // Degradado para el fondo
+              Color.fromARGB(255, 146, 197, 130), 
+              Color.fromARGB(255, 80, 121, 76)    
+            ], 
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
         ),
-        child: Center(
-          child: FutureBuilder<List<Treasure>>(
-            future: futureTreasure,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text("Error: ${snapshot.error}");
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return Text("No data available");
-              } else {
-                return ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) {
-                    final treasure = snapshot.data![index];
-                    return Card(
-                      color: Color.fromARGB(255, 253, 255, 224), // Color del fondo del Card
-                      child: ListTile(
-                        leading: Image.network(treasure.image, width: 50, height: 50, fit: BoxFit.cover),
-                        title: Text(
-                          treasure.name, 
-                          style: TextStyle(
-                            color: Color.fromARGB(255, 118, 118, 118), 
-                            fontFamily: 'zelda'
-                          )
-                        ), // Color del texto
-                        subtitle: Text(
-                          "${treasure.category}",
-                          style: TextStyle(
-                            color: Color.fromARGB(255, 118, 118, 118), 
-                            fontFamily: 'zelda'
-                          ) // Color del subtítulo
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => TreasureDisplay(id: treasure.id),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                );
-              }
-            },
-          ),
+        child: FutureBuilder<List<Treasure>>(
+          future: futureTreasure,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text("Error: ${snapshot.error}"));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return Center(child: Text("No data available"));
+            } else {
+              final treasures = snapshot.data!;
+              final favoriteTreasures = treasures.where((treasure) => treasure.favorite).toList();
+              final otherTreasures = treasures.where((treasure) => !treasure.favorite).toList();
+
+              return ListView(
+                children: [
+                  if (favoriteTreasures.isNotEmpty) ...[
+                    _buildSectionTitle('Favorites'),
+                    ...favoriteTreasures.map((treasure) => _buildListTile(treasure)),
+                  ] else ...[
+                    Center(child: Text("No favorite treasures")),
+                  ],
+                  if (otherTreasures.isNotEmpty) ...[
+                    _buildSectionTitle('Others'),
+                    ...otherTreasures.map((treasure) => _buildListTile(treasure)),
+                  ] else ...[
+                    Center(child: Text("No other treasures")),
+                  ],
+                ],
+              );
+            }
+          },
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'zelda',
+        ),
+      ),
+    );
+  }
+
+  Widget _buildListTile(Treasure treasure) {
+    return Card(
+      color: Color.fromARGB(255, 253, 255, 224), 
+      child: ListTile(
+        leading: Image.network(treasure.image, width: 50, height: 50, fit: BoxFit.cover),
+        title: Text(
+          treasure.name,
+          style: TextStyle(color: Color.fromARGB(255, 118, 118, 118), fontFamily: 'zelda'), 
+        ),
+        subtitle: Text(
+          "${treasure.category}",
+          style: TextStyle(color: Color.fromARGB(255, 118, 118, 118), fontFamily: 'zelda'), 
+        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TreasureDisplay(id: treasure.id),
+            ),
+          );
+        },
       ),
     );
   }
