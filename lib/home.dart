@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:zelda_pensamiento/tresure_page.dart';
+import 'package:zelda_pensamiento/treasure_page.dart';
 import 'package:zelda_pensamiento/monster_page.dart';
 import 'package:zelda_pensamiento/equipment_page.dart';
 
@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => TresurePage())
+                    MaterialPageRoute(builder: (context) => TreasurePage())
                   );
                 },
               ),
