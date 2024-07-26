@@ -4,9 +4,9 @@ class Equipment {
   int id;
   String image;
   String name;
-  List<String> commonLocations; 
+  List<String> commonLocations;
   bool dlc;
-  EquipmentProperties? properties; 
+  EquipmentProperties? properties;
   bool favorite;
 
   Equipment({
@@ -15,9 +15,9 @@ class Equipment {
     required this.id,
     required this.image,
     required this.name,
-    required this.commonLocations, 
+    required this.commonLocations,
     required this.dlc,
-    this.properties, 
+    this.properties,
     required this.favorite,
   });
 
@@ -28,10 +28,10 @@ class Equipment {
       id: json['id'] as int,
       image: json['image'] as String,
       name: json['name'] as String,
-      commonLocations: json['common_locations'] != null ? List<String>.from(json['common_locations'] as List<dynamic>) : [], 
-      dlc: json['dlc'] ?? false, 
-      properties: json['properties'] != null ? EquipmentProperties.fromJson(json['properties'] as Map<String, dynamic>) : null, 
-      favorite: json['favorite'] ?? false, 
+      commonLocations: json['common_locations'] != null ? List<String>.from(json['common_locations'] as List<dynamic>) : [],
+      dlc: json['dlc'] ?? false,
+      properties: json['properties'] != null ? EquipmentProperties.fromJson(json['properties'] as Map<String, dynamic>) : null,
+      favorite: json['favorite'] ?? false,
     );
   }
 
@@ -51,8 +51,8 @@ class EquipmentProperties {
 
   factory EquipmentProperties.fromJson(Map<String, dynamic> json) {
     return EquipmentProperties(
-      attack: json['attack'] ?? 0, // Provide a default value if null
-      defense: json['defense'] ?? 0, // Provide a default value if null
+      attack: json['attack'] ?? 0,
+      defense: json['defense'] ?? 0,
     );
   }
 }

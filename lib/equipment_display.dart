@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:zelda_pensamiento/model/equipment.dart';
 
@@ -13,7 +16,9 @@ class EquipmentDisplay extends StatefulWidget {
 }
 
 class _EquipmentDisplayState extends State<EquipmentDisplay> {
-  late Future<Equipment> futureEquipment;
+  late Future<Equipment?> futureEquipment;
+  Equipment? _equipment;
+  List<dynamic>? _jsonList;
 
   @override
   void initState() {
@@ -21,19 +26,61 @@ class _EquipmentDisplayState extends State<EquipmentDisplay> {
     futureEquipment = fetchEquipment();
   }
 
-  Future<Equipment> fetchEquipment() async {
-    final response = await http.get(Uri.parse('https://botw-compendium.herokuapp.com/api/v3/compendium/category/equipment'));
+  Future<File> _getLocalFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    return File('${directory.path}/equipmentlist.json');
+  }
 
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonDecoded = jsonDecode(response.body)["data"] as List<dynamic>;
-      final equipment = jsonDecoded
-          .map((dynamic item) => Equipment.fromJson(item as Map<String, dynamic>))
-          .firstWhere((equipment) => equipment.id == widget.id);
-
-      return equipment;
-    } else {
-      throw Exception('Failed to load equipment');
+  Future<void> _copyAssetToLocal() async {
+    final file = await _getLocalFile();
+    if (!file.existsSync()) {
+      final response = await http.get(Uri.parse('https://botw-compendium.herokuapp.com/api/v3/compendium/category/equipment'));
+      if (response.statusCode == 200) {
+        await file.writeAsString(response.body);
+      } else {
+        throw Exception('Failed to load equipment');
+      }
     }
+  }
+
+  Future<Equipment?> fetchEquipment() async {
+    await _copyAssetToLocal();
+    final file = await _getLocalFile();
+    String jsonString = await file.readAsString();
+    _jsonList = json.decode(jsonString)["data"];
+    Equipment? equipment;
+    for (var json in _jsonList!) {
+      if (json['id'] == widget.id) {
+        equipment = Equipment.fromJson(json);
+        break;
+      }
+    }
+    return equipment;
+  }
+
+  Future<void> _guardarCambios() async {
+    final file = await _getLocalFile();
+    if (_jsonList != null && _equipment != null) {
+      for (var json in _jsonList!) {
+        if (json['id'] == widget.id) {
+          json['favorite'] = _equipment!.favorite;
+          break;
+        }
+      }
+      await file.writeAsString(json.encode({"data": _jsonList}));
+    }
+  }
+
+  void _cambiarSeleccionado() {
+    setState(() {
+      if (_equipment != null) {
+        _equipment!.cambiarSeleccionado();
+        _guardarCambios();
+      }
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Favorite: ${_equipment?.favorite == true ? 'Yes' : 'No'}')),
+    );
   }
 
   @override
@@ -42,59 +89,65 @@ class _EquipmentDisplayState extends State<EquipmentDisplay> {
       appBar: AppBar(
         title: Text('Equipment Details'),
       ),
-      body: FutureBuilder<Equipment>(
+
+      body: FutureBuilder<Equipment?>(
         future: futureEquipment,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text("Error: ${snapshot.error}"));
-          } else if (!snapshot.hasData) {
+          } else if (!snapshot.hasData || snapshot.data == null) {
             return Center(child: Text("No data available"));
           } else {
-            final equipment = snapshot.data!;
-
+            _equipment = snapshot.data!;
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  //info
+                  
                   Image.network(
-                    equipment.image,
+                    _equipment!.image,
                     fit: BoxFit.cover,
                     height: 200,
                     width: double.infinity,
                   ),
                   SizedBox(height: 16),
-
                   Text(
-                    equipment.name,
+                    _equipment!.name,
                     style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 8),
-
                   Text(
-                    equipment.description,
+                    _equipment!.description,
                     style: TextStyle(fontSize: 25),
                   ),
                   SizedBox(height: 8),
-
-                  if (equipment.commonLocations.isNotEmpty) 
+                  if (_equipment!.commonLocations.isNotEmpty)
                     Text(
                       'Common Locations:',
                       style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     ),
-                  ...equipment.commonLocations.map(
+                  ..._equipment!.commonLocations.map(
                     (location) => Text(
                       location,
                       style: TextStyle(fontSize: 20),
                     ),
                   ),
                   SizedBox(height: 8),
-
                   Text(
-                    'DLC: ${equipment.dlc ? 'Yes' : 'No'}',
+                    'DLC: ${_equipment!.dlc ? 'Yes' : 'No'}',
+                    style: TextStyle(fontSize: 25),
+                  ),
+                  SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: _cambiarSeleccionado,
+                    child: Text('Toggle Favorite'),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Favorite: ${_equipment!.favorite ? 'Yes' : 'No'}',
                     style: TextStyle(fontSize: 25),
                   ),
                 ],

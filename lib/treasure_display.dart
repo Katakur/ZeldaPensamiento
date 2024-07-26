@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:zelda_pensamiento/model/treasure.dart';
 
@@ -13,7 +16,9 @@ class TreasureDisplay extends StatefulWidget {
 }
 
 class _TreasureDisplayState extends State<TreasureDisplay> {
-  late Future<Treasure> futureTreasure;
+  late Future<Treasure?> futureTreasure;
+  Treasure? _treasure;
+  List<dynamic>? _jsonList;
 
   @override
   void initState() {
@@ -21,19 +26,61 @@ class _TreasureDisplayState extends State<TreasureDisplay> {
     futureTreasure = fetchTreasure();
   }
 
-  Future<Treasure> fetchTreasure() async {
-    final response = await http.get(Uri.parse('https://botw-compendium.herokuapp.com/api/v3/compendium/category/treasure'));
+  Future<File> _getLocalFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    return File('${directory.path}/treasurelist.json');
+  }
 
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonDecoded = jsonDecode(response.body)["data"] as List<dynamic>;
-      final treasure = jsonDecoded
-          .map((dynamic item) => Treasure.fromJson(item as Map<String, dynamic>))
-          .firstWhere((treasure) => treasure.id == widget.id);
-
-      return treasure;
-    } else {
-      throw Exception('Failed to load treasure');
+  Future<void> _copyAssetToLocal() async {
+    final file = await _getLocalFile();
+    if (!file.existsSync()) {
+      final response = await http.get(Uri.parse('https://botw-compendium.herokuapp.com/api/v3/compendium/category/treasure'));
+      if (response.statusCode == 200) {
+        await file.writeAsString(response.body);
+      } else {
+        throw Exception('Failed to load treasure');
+      }
     }
+  }
+
+  Future<Treasure?> fetchTreasure() async {
+    await _copyAssetToLocal();
+    final file = await _getLocalFile();
+    String jsonString = await file.readAsString();
+    _jsonList = json.decode(jsonString)["data"];
+    Treasure? treasure;
+    for (var json in _jsonList!) {
+      if (json['id'] == widget.id) {
+        treasure = Treasure.fromJson(json);
+        break;
+      }
+    }
+    return treasure;
+  }
+
+  Future<void> _guardarCambios() async {
+    final file = await _getLocalFile();
+    if (_jsonList != null && _treasure != null) {
+      for (var json in _jsonList!) {
+        if (json['id'] == widget.id) {
+          json['favorite'] = _treasure!.favorite;
+          break;
+        }
+      }
+      await file.writeAsString(json.encode({"data": _jsonList}));
+    }
+  }
+
+  void _cambiarSeleccionado() {
+    setState(() {
+      if (_treasure != null) {
+        _treasure!.cambiarSeleccionado();
+        _guardarCambios();
+      }
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Favorite: ${_treasure?.favorite == true ? 'Yes' : 'No'}')),
+    );
   }
 
   @override
@@ -42,72 +89,77 @@ class _TreasureDisplayState extends State<TreasureDisplay> {
       appBar: AppBar(
         title: Text('Treasure Details'),
       ),
-      body: FutureBuilder<Treasure>(
+
+      body: FutureBuilder<Treasure?>(
         future: futureTreasure,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text("Error: ${snapshot.error}"));
-          } else if (!snapshot.hasData) {
+          } else if (!snapshot.hasData || snapshot.data == null) {
             return Center(child: Text("No data available"));
           } else {
-            final treasure = snapshot.data!;
-
+            _treasure = snapshot.data!;
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  //info
+                  
                   Image.network(
-                    treasure.image,
+                    _treasure!.image,
                     fit: BoxFit.cover,
                     height: 200,
                     width: double.infinity,
                   ),
                   SizedBox(height: 16),
-
                   Text(
-                    treasure.name,
+                    _treasure!.name,
                     style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 8),
-
                   Text(
-                    treasure.description,
+                    _treasure!.description,
                     style: TextStyle(fontSize: 25),
                   ),
                   SizedBox(height: 8),
-
-                  if (treasure.commonLocations.isNotEmpty) 
+                  if (_treasure!.commonLocations.isNotEmpty)
                     Text(
                       'Common Locations:',
                       style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     ),
-                  ...treasure.commonLocations.map(
+                  ..._treasure!.commonLocations.map(
                     (location) => Text(
                       location,
                       style: TextStyle(fontSize: 20),
                     ),
                   ),
                   SizedBox(height: 8),
-
-                  if (treasure.drops.isNotEmpty) 
+                  if (_treasure!.drops.isNotEmpty)
                     Text(
                       'Drops:',
                       style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     ),
-                  ...treasure.drops.map(
+                  ..._treasure!.drops.map(
                     (drop) => Text(
                       drop,
                       style: TextStyle(fontSize: 20),
                     ),
                   ),
                   SizedBox(height: 8),
-
                   Text(
-                    'DLC: ${treasure.dlc ? 'Yes' : 'No'}',
+                    'DLC: ${_treasure!.dlc ? 'Yes' : 'No'}',
+                    style: TextStyle(fontSize: 25),
+                  ),
+                  SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: _cambiarSeleccionado,
+                    child: Text('Toggle Favorite'),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Favorite: ${_treasure!.favorite ? 'Yes' : 'No'}',
                     style: TextStyle(fontSize: 25),
                   ),
                 ],
