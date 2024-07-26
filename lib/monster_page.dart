@@ -28,7 +28,6 @@ class _MonsterPageState extends State<MonsterPage> {
   Future<void> _copyAssetToLocal() async {
     final file = await _getLocalFile();
     if (!file.existsSync()) {
-      
       final response = await http.get(Uri.parse('https://botw-compendium.herokuapp.com/api/v3/compendium/category/monsters'));
       if (response.statusCode == 200) {
         await file.writeAsString(response.body);
@@ -48,6 +47,12 @@ class _MonsterPageState extends State<MonsterPage> {
     return monsters;
   }
 
+  Future<void> _refreshData() async {
+    setState(() {
+      futureMonster = fetchMonsters(); // Refresh the Future
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,6 +64,12 @@ class _MonsterPageState extends State<MonsterPage> {
           ),
         ),
         backgroundColor: Color.fromARGB(255, 205, 247, 253), 
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: _refreshData,
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -138,7 +149,7 @@ class _MonsterPageState extends State<MonsterPage> {
             MaterialPageRoute(
               builder: (context) => MonsterDisplay(id: monster.id),
             ),
-          );
+          ).then((_) => _refreshData()); // Refresh data after returning from MonsterDisplay
         },
       ),
     );

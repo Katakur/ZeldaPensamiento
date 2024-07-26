@@ -26,9 +26,15 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _treasures = _loadFavorites('treasurelist.json', (json) => Treasure.fromJson(json));
-    _monsters = _loadFavorites('monsterlist.json', (json) => Monster.fromJson(json));
-    _equipments = _loadFavorites('equipmentlist.json', (json) => Equipment.fromJson(json));
+    _loadFavoritesData();
+  }
+
+  Future<void> _loadFavoritesData() async {
+    setState(() {
+      _treasures = _loadFavorites('treasurelist.json', (json) => Treasure.fromJson(json));
+      _monsters = _loadFavorites('monsterlist.json', (json) => Monster.fromJson(json));
+      _equipments = _loadFavorites('equipmentlist.json', (json) => Equipment.fromJson(json));
+    });
   }
 
   Future<File> _getLocalFile(String filename) async {
@@ -96,7 +102,7 @@ class _HomePageState extends State<HomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => TreasurePage()),
-                );
+                ).then((_) => _loadFavoritesData());
               },
             ),
             ListTile(
@@ -106,7 +112,7 @@ class _HomePageState extends State<HomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => MonsterPage()),
-                );
+                ).then((_) => _loadFavoritesData());
               },
             ),
             ListTile(
@@ -116,7 +122,7 @@ class _HomePageState extends State<HomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => EquipmentPage()),
-                );
+                ).then((_) => _loadFavoritesData());
               },
             ),
             ListTile(
@@ -161,29 +167,29 @@ class _HomePageState extends State<HomePage> {
               child: ListView(
                 padding: EdgeInsets.all(8.0),
                 children: [
-                  Text('tesoros favoritos'),
+                  Text('Favorite Treasures'),
                   _buildFavoritesList(
                     futureFavorites: _treasures,
                     onTap: (id) => Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => TreasureDisplay(id: id)),
-                    ),
+                    ).then((_) => _loadFavoritesData()),
                   ),
-                  Text('mounstruos favoritos'),
+                  Text('Favorite Monsters'),
                   _buildFavoritesList(
                     futureFavorites: _monsters,
                     onTap: (id) => Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => MonsterDisplay(id: id)),
-                    ),
+                    ).then((_) => _loadFavoritesData()),
                   ),
-                  Text('equipamiento favoritos'),
+                  Text('Favorite Equipment'),
                   _buildFavoritesList(
                     futureFavorites: _equipments,
                     onTap: (id) => Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => EquipmentDisplay(id: id)),
-                    ),
+                    ).then((_) => _loadFavoritesData()),
                   ),
                 ],
               ),
@@ -206,7 +212,7 @@ class _HomePageState extends State<HomePage> {
         } else if (snapshot.hasError) {
           return Center(child: Text("Error: ${snapshot.error}"));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text("No hay ningún ítem favorito"));
+          return Center(child: Text("No favorite items"));
         } else {
           final items = snapshot.data!;
           return Column(

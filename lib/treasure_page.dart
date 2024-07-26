@@ -47,6 +47,12 @@ class _TreasurePageState extends State<TreasurePage> {
     return treasures;
   }
 
+  Future<void> _refreshData() async {
+    setState(() {
+      futureTreasure = fetchTreasures(); // Refresh the Future
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,7 +63,13 @@ class _TreasurePageState extends State<TreasurePage> {
             fontSize: 20, 
           ),
         ),
-        backgroundColor: Color.fromARGB(255, 205, 247, 253), 
+        backgroundColor: Color.fromARGB(255, 205, 247, 253),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: _refreshData,
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -140,7 +152,7 @@ class _TreasurePageState extends State<TreasurePage> {
             MaterialPageRoute(
               builder: (context) => TreasureDisplay(id: treasure.id),
             ),
-          );
+          ).then((_) => _refreshData()); // Refresh data after returning from TreasureDisplay
         },
       ),
     );

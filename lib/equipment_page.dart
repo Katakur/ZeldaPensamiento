@@ -36,6 +36,12 @@ class _EquipmentPageState extends State<EquipmentPage> {
     return jsonDecoded.map((dynamic item) => Equipment.fromJson(item as Map<String, dynamic>)).toList();
   }
 
+  Future<void> _refreshData() async {
+    setState(() {
+      futureEquipment = fetchEquipment(); // Refresh the Future
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,19 +49,25 @@ class _EquipmentPageState extends State<EquipmentPage> {
         title: Text(
           'Equipment Page',
           style: TextStyle(
-            fontFamily: 'zelda', 
-            fontSize: 20, 
+            fontFamily: 'zelda',
+            fontSize: 20,
           ),
         ),
-        backgroundColor: Color.fromARGB(255, 205, 247, 253), 
+        backgroundColor: Color.fromARGB(255, 205, 247, 253),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: _refreshData,
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color.fromARGB(255, 146, 197, 130), 
-              Color.fromARGB(255, 80, 121, 76)    
-            ], 
+              Color.fromARGB(255, 146, 197, 130),
+              Color.fromARGB(255, 80, 121, 76),
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -112,7 +124,7 @@ class _EquipmentPageState extends State<EquipmentPage> {
 
   Widget _buildListTile(Equipment equipment) {
     return Card(
-      color: Color.fromARGB(255, 253, 255, 224), 
+      color: Color.fromARGB(255, 253, 255, 224),
       child: ListTile(
         leading: Image.network(equipment.image, width: 50, height: 50, fit: BoxFit.cover),
         title: Text(
@@ -129,7 +141,7 @@ class _EquipmentPageState extends State<EquipmentPage> {
             MaterialPageRoute(
               builder: (context) => EquipmentDisplay(id: equipment.id),
             ),
-          );
+          ).then((_) => _refreshData()); // Refresh data after returning from EquipmentDisplay
         },
       ),
     );
