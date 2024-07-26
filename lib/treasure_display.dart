@@ -38,7 +38,7 @@ class _TreasureDisplayState extends State<TreasureDisplay> {
       if (response.statusCode == 200) {
         await file.writeAsString(response.body);
       } else {
-        throw Exception('Failed to load treasure');
+        throw Exception('Failed to load treasures');
       }
     }
   }
@@ -89,7 +89,6 @@ class _TreasureDisplayState extends State<TreasureDisplay> {
       appBar: AppBar(
         title: Text('Treasure Details'),
       ),
-
       body: FutureBuilder<Treasure?>(
         future: futureTreasure,
         builder: (context, snapshot) {
@@ -106,7 +105,6 @@ class _TreasureDisplayState extends State<TreasureDisplay> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  
                   Image.network(
                     _treasure!.image,
                     fit: BoxFit.cover,
