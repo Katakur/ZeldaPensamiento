@@ -4,9 +4,9 @@ class Equipment {
   int id;
   String image;
   String name;
-  List<String> commonLocations; // Uncomment and use if you need this field
+  List<String> commonLocations; 
   bool dlc;
-  EquipmentProperties? properties; // Make this nullable if it's not always present
+  EquipmentProperties? properties; 
   bool favorite;
 
   Equipment({
@@ -15,9 +15,9 @@ class Equipment {
     required this.id,
     required this.image,
     required this.name,
-    required this.commonLocations, // Uncomment if you are using this field
+    required this.commonLocations, 
     required this.dlc,
-    this.properties, // Make it optional
+    this.properties, 
     required this.favorite,
   });
 
@@ -28,14 +28,10 @@ class Equipment {
       id: json['id'] as int,
       image: json['image'] as String,
       name: json['name'] as String,
-      commonLocations: json['common_locations'] != null 
-          ? List<String>.from(json['common_locations'] as List<dynamic>) 
-          : [], // Provide an empty list if null
-      dlc: json['dlc'] ?? false, // Provide a default value if null
-      properties: json['properties'] != null 
-          ? EquipmentProperties.fromJson(json['properties'] as Map<String, dynamic>) 
-          : null, // Make properties optional
-      favorite: json['favorite'] ?? false, // Provide a default value if null
+      commonLocations: json['common_locations'] != null ? List<String>.from(json['common_locations'] as List<dynamic>) : [], 
+      dlc: json['dlc'] ?? false, 
+      properties: json['properties'] != null ? EquipmentProperties.fromJson(json['properties'] as Map<String, dynamic>) : null, 
+      favorite: json['favorite'] ?? false, 
     );
   }
 

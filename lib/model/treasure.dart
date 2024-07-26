@@ -28,14 +28,10 @@ class Treasure {
       id: json['id'] as int,
       image: json['image'] as String,
       name: json['name'] as String,
-      commonLocations: json['common_locations'] != null 
-          ? List<String>.from(json['common_locations'] as List<dynamic>) 
-          : [], // Provide an empty list if null
-      drops: json['drops'] != null 
-          ? List<String>.from(json['drops'] as List<dynamic>) 
-          : [], // Provide an empty list if null
-      dlc: json['dlc'] ?? false, // Provide a default value if null
-      favorite: json['favorite'] ?? false, // Provide a default value if null
+      commonLocations: json['common_locations'] != null ? List<String>.from(json['common_locations'] as List<dynamic>) : [], 
+      drops: json['drops'] != null ? List<String>.from(json['drops'] as List<dynamic>) : [], 
+      dlc: json['dlc'] ?? false, 
+      favorite: json['favorite'] ?? false, 
     );
   }
 
