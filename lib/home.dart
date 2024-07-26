@@ -138,7 +138,7 @@ class _HomePageState extends State<HomePage> {
             color: Color.fromARGB(255, 80, 121, 76),
             padding: EdgeInsets.all(16.0),
             child: Text(
-              'Aquí puedes poner una descripción del juego. Explica la historia, el objetivo, y cualquier detalle relevante que quieras compartir con el usuario.',
+              'The legends of Zelda: Breath of the Wild is a videogame',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.white,
