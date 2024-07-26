@@ -21,7 +21,7 @@ class _MonsterPageState extends State<MonsterPage> {
   }
 
   Future<List<Monster>> fetchMonster() async {
-    final response = await http.get(Uri.parse('https://botw-compendium.herokuapp.com/api/v3/compendium/category/equipment'));
+    final response = await http.get(Uri.parse('https://botw-compendium.herokuapp.com/api/v3/compendium/category/monsters'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonDecoded = jsonDecode(response.body)["data"] as List<dynamic>;
