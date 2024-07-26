@@ -144,7 +144,7 @@ class _HomePageState extends State<HomePage> {
             color: Color.fromARGB(255, 80, 121, 76),
             padding: EdgeInsets.all(16.0),
             child: Text(
-              'The legends of Zelda: Breath of the Wild is a videogame',
+              'Zelda Pensamiento, the app about Breath of the Wild info. If you want to add items to Favorites, please check the Treasures, Monsters or Equipment sections',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.white,
