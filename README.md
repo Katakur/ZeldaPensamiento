@@ -10,3 +10,4 @@ Ingeniería en Desarrollo de Videojuegos y Realidad Virtual
 Universidad de Talca
 
 Link del video explicativo (copie y pegue el link en su navegador)
+https://youtu.be/fMiKjN1Yz5o
